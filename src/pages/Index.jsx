@@ -1,6 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { increment, decrement } from '../store/counterSlice';
-import { Button } from "@/components/ui/button";
+import { Button } from "../components/ui/button";
 
 const Index = () => {
   const count = useSelector((state) => state.counter.value);
