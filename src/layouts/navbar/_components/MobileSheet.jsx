@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "../../../components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "../../../components/ui/sheet";
 import { Menu, Package2 } from "lucide-react";
 import { NavItem } from "./NavItem";
 import { navItems } from "../../../nav-items";
