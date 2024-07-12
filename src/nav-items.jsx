@@ -1,4 +1,4 @@
-import { Home, Brain } from "lucide-react";
+import { Home, Camera } from "lucide-react";
 import Index from "./pages/Index.jsx";
 import TensorflowDemo from "./pages/TensorflowDemo.jsx";
 
@@ -13,9 +13,9 @@ export const navItems = [
     page: <Index />,
   },
   {
-    title: "TensorFlow Demo",
-    to: "/tensorflow-demo",
-    icon: <Brain className="h-4 w-4" />,
+    title: "Object Detection",
+    to: "/object-detection",
+    icon: <Camera className="h-4 w-4" />,
     page: <TensorflowDemo />,
   },
 ];
