@@ -1,6 +1,6 @@
 import { Package2 } from "lucide-react";
 import { NavItem } from "./NavItem";
-import { navItems } from "@/nav-items";
+import { navItems } from "../../../nav-items";
 
 export const DesktopNavbar = () => (
   <nav className="hidden md:flex md:items-center md:gap-5 lg:gap-6 text-lg font-medium md:text-sm">
