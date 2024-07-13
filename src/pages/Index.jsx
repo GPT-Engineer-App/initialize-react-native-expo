@@ -40,18 +40,25 @@ const Index = () => {
         <CardContent>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {Object.entries(counters).map(([item, count]) => (
+              {Object.entries(counters).map(([item, counts]) => (
                 <Card key={item}>
                   <CardHeader>
                     <CardTitle className="text-lg capitalize">{item.replace('_', ' ')}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex items-center space-x-2">
-                      <Progress value={(count / 100) * 100} max={100} className="w-full" />
-                      <span className="text-sm font-medium">{count}</span>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span>Daily:</span>
+                        <span>{counts.daily}</span>
+                      </div>
+                      <Progress value={(counts.daily / 100) * 100} max={100} className="w-full" />
+                      <div className="flex items-center justify-between">
+                        <span>All-Time:</span>
+                        <span>{counts.allTime}</span>
+                      </div>
                     </div>
                     {item === 'glass_bottle' && (
-                      <Button onClick={handleManualIncrement} className="mt-2">
+                      <Button onClick={handleManualIncrement} className="mt-2 w-full">
                         Increment Glass Bottle
                       </Button>
                     )}
