@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useGetEvents, useCreateEvent } from '../integrations/supabase';
+import { codehooksService } from '../services/codehooksService';
+import { COLLECTIONS } from '../config/api';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,8 +9,6 @@ import { useToast } from "@/components/ui/use-toast";
 const Index = () => {
   const [events, setEvents] = useState([]);
   const [newEventName, setNewEventName] = useState('');
-  const getEvents = useGetEvents();
-  const createEvent = useCreateEvent();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -18,7 +17,7 @@ const Index = () => {
 
   const fetchEvents = async () => {
     try {
-      const fetchedEvents = await getEvents();
+      const fetchedEvents = await codehooksService.getData(COLLECTIONS.EVENTS);
       setEvents(fetchedEvents);
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -35,7 +34,7 @@ const Index = () => {
     if (!newEventName.trim()) return;
 
     try {
-      await createEvent({ name: newEventName, date: new Date().toISOString() });
+      await codehooksService.postData(COLLECTIONS.EVENTS, { name: newEventName, date: new Date().toISOString() });
       setNewEventName('');
       fetchEvents();
       toast({
@@ -80,7 +79,7 @@ const Index = () => {
           {events.length > 0 ? (
             <ul className="space-y-2">
               {events.map((event) => (
-                <li key={event.id} className="bg-secondary p-2 rounded">
+                <li key={event._id} className="bg-secondary p-2 rounded">
                   {event.name} - {new Date(event.date).toLocaleDateString()}
                 </li>
               ))}
