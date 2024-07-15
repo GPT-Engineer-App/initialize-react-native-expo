@@ -18,28 +18,58 @@ import { submitFeedback } from '../lib/feedback';
 import { trackEvent } from '../lib/analytics';
 
 const TensorflowDemo = () => {
-  // ... (existing state and refs)
+  const [detectedItems, setDetectedItems] = useState([]);
+  const [isDetecting, setIsDetecting] = useState(false);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const { toast } = useToast();
+  const dispatch = useDispatch();
+  const selectedItem = useSelector((state) => state.settings.selectedItem);
+  const detectionArea = useSelector((state) => state.settings.detectionArea);
+  const [userId, setUserId] = useState('user123'); // TODO: Implement proper user management
 
-  const handleDetection = async (detectedItems) => {
-    // ... (existing detection logic)
+  const handleDetection = async () => {
+    if (!isDetecting) {
+      setIsDetecting(true);
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      videoRef.current.srcObject = stream;
+      videoRef.current.play();
 
-    // Store detection results
-    await storeDetectionResults({
-      items: detectedItems,
-      timestamp: new Date().toISOString(),
-    });
+      const detectFrame = async () => {
+        if (isDetecting && videoRef.current && canvasRef.current) {
+          const detectedItems = await tensorflowService.detectObjects(videoRef.current, selectedItem);
+          setDetectedItems(detectedItems);
+          dispatch(incrementCount({ item: selectedItem, amount: detectedItems.length }));
 
-    // Send notification if a significant number of items are detected
-    if (detectedItems.length > 5) {
-      await sendNotification(userId, `Detected ${detectedItems.length} items!`);
+          // Store detection results
+          await storeDetectionResults({
+            items: detectedItems,
+            timestamp: new Date().toISOString(),
+          });
+
+          // Send notification if a significant number of items are detected
+          if (detectedItems.length > 5) {
+            await sendNotification(userId, `Detected ${detectedItems.length} items!`);
+          }
+
+          // Track detection event
+          await trackEvent({
+            type: 'detection',
+            itemCount: detectedItems.length,
+            timestamp: new Date().toISOString(),
+          });
+
+          requestAnimationFrame(detectFrame);
+        }
+      };
+
+      detectFrame();
+    } else {
+      setIsDetecting(false);
+      const stream = videoRef.current.srcObject;
+      const tracks = stream.getTracks();
+      tracks.forEach(track => track.stop());
     }
-
-    // Track detection event
-    await trackEvent({
-      type: 'detection',
-      itemCount: detectedItems.length,
-      timestamp: new Date().toISOString(),
-    });
   };
 
   const handleFeedback = async (feedback) => {
@@ -55,10 +85,33 @@ const TensorflowDemo = () => {
     });
   };
 
-  // ... (rest of the component)
-
   return (
-    // ... (existing JSX)
+    <Card>
+      <CardHeader>
+        <CardTitle>TensorFlow Demo</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col items-center space-y-4">
+          <video ref={videoRef} className="w-full max-w-lg" />
+          <canvas ref={canvasRef} className="w-full max-w-lg" />
+          <Button onClick={handleDetection}>
+            {isDetecting ? 'Stop Detection' : 'Start Detection'}
+          </Button>
+          <div>
+            <h3>Detected Items:</h3>
+            <ul>
+              {detectedItems.map((item, index) => (
+                <li key={index}>{item.class} - Confidence: {item.score.toFixed(2)}</li>
+              ))}
+            </ul>
+          </div>
+          <Textarea
+            placeholder="Provide feedback on detection accuracy"
+            onChange={(e) => handleFeedback(e.target.value)}
+          />
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
