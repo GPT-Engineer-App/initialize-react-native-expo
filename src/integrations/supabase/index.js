@@ -27,11 +27,7 @@ export const SupabaseProvider = ({ children }) => {
     }
   }, [])
 
-  return (
-    <SupabaseContext.Provider value={{ supabase, user }}>
-      {children}
-    </SupabaseContext.Provider>
-  )
+  return createElement(SupabaseContext.Provider, { value: { supabase, user } }, children)
 }
 
 export const useSupabase = () => {
