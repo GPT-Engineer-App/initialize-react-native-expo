@@ -1,15 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { codehooksService } from '../services/codehooksService';
 
 const CodehooksIntegration = () => {
   const [apiKey, setApiKey] = useState('');
   const [endpoint, setEndpoint] = useState('');
+  const [data, setData] = useState([]);
+  const [newItemName, setNewItemName] = useState('');
+  const [newItemValue, setNewItemValue] = useState('');
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const result = await codehooksService.getData();
+      setData(result);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch data from Codehooks.io",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleSaveConfig = () => {
     // TODO: Implement saving API configuration
@@ -17,6 +40,44 @@ const CodehooksIntegration = () => {
       title: "Configuration Saved",
       description: "Your Codehooks.io configuration has been saved.",
     });
+  };
+
+  const handleAddItem = async () => {
+    try {
+      await codehooksService.postData('items', { name: newItemName, value: newItemValue });
+      setNewItemName('');
+      setNewItemValue('');
+      fetchData();
+      toast({
+        title: "Item Added",
+        description: "New item has been added successfully.",
+      });
+    } catch (error) {
+      console.error('Error adding item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add new item",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteItem = async (id) => {
+    try {
+      await codehooksService.deleteDataById('items', id);
+      fetchData();
+      toast({
+        title: "Item Deleted",
+        description: "Item has been deleted successfully.",
+      });
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete item",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -66,8 +127,41 @@ const CodehooksIntegration = () => {
                   <CardTitle>Data Management</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {/* TODO: Implement data management functionality */}
-                  <p>Data management features coming soon...</p>
+                  <div className="space-y-4">
+                    <div className="flex space-x-2">
+                      <Input
+                        placeholder="Item Name"
+                        value={newItemName}
+                        onChange={(e) => setNewItemName(e.target.value)}
+                      />
+                      <Input
+                        placeholder="Item Value"
+                        value={newItemValue}
+                        onChange={(e) => setNewItemValue(e.target.value)}
+                      />
+                      <Button onClick={handleAddItem}>Add Item</Button>
+                    </div>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Value</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {data.map((item) => (
+                          <TableRow key={item._id}>
+                            <TableCell>{item.name}</TableCell>
+                            <TableCell>{item.value}</TableCell>
+                            <TableCell>
+                              <Button variant="destructive" onClick={() => handleDeleteItem(item._id)}>Delete</Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
