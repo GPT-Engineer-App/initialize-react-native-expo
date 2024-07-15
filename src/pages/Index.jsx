@@ -6,12 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from 'react-router-dom';
+import { codehooksService } from '../services/codehooksService';
 
 const Index = () => {
   const dispatch = useDispatch();
   const counters = useSelector((state) => state.counters);
   const selectedItem = useSelector((state) => state.settings.selectedItem);
   const { toast } = useToast();
+  const [codehooksData, setCodehooksData] = useState(null);
 
   useEffect(() => {
     console.log('Index component mounted');
@@ -21,8 +23,26 @@ const Index = () => {
       }
     }, 5000); // Update every 5 seconds
 
+    // Fetch data from Codehooks
+    codehooksService.getData()
+      .then(data => {
+        setCodehooksData(data);
+        toast({
+          title: "Codehooks Data Fetched",
+          description: "Successfully retrieved data from Codehooks.",
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching Codehooks data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch data from Codehooks.",
+          variant: "destructive",
+        });
+      });
+
     return () => clearInterval(interval);
-  }, [dispatch, selectedItem]);
+  }, [dispatch, selectedItem, toast]);
 
   const handleManualIncrement = () => {
     dispatch(incrementManualCount({ item: 'glass_bottle', date: new Date().toISOString().split('T')[0] }));
@@ -73,6 +93,16 @@ const Index = () => {
           </div>
         </CardContent>
       </Card>
+      {codehooksData && (
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle>Codehooks Data</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <pre>{JSON.stringify(codehooksData, null, 2)}</pre>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
