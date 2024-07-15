@@ -12,6 +12,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 
 if ('serviceWorker' in navigator) {
   const wb = new Workbox('/service-worker.js');
+  
   wb.register().then(registration => {
     console.log('Service Worker registered with scope:', registration.scope);
   }).catch(error => {
