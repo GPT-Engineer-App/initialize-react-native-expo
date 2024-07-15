@@ -2,6 +2,7 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Dashboard from '../components/CodehooksIntegration/Dashboard';
+import DetailedLogs from '../components/CodehooksIntegration/DetailedLogs';
 
 const CodehooksIntegration = () => {
   return (
@@ -24,8 +25,7 @@ const CodehooksIntegration = () => {
               <Dashboard />
             </TabsContent>
             <TabsContent value="logs">
-              {/* Logs component will be added here */}
-              <p>Logs content coming soon...</p>
+              <DetailedLogs />
             </TabsContent>
             <TabsContent value="users">
               {/* User Management component will be added here */}
