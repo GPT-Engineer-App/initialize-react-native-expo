@@ -1,4 +1,4 @@
-import { API_BASE_URL, COLLECTIONS, getHeaders } from '../config/api';
+import { API_BASE_URL, getHeaders } from '../config/api';
 
 class DataStorageService {
   async create(collection, data) {
