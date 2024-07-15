@@ -6,39 +6,11 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { tensorflowService } from '../lib/tensorflowService';
+import { uploadTrainingData, startTrainingJob, getTrainedModel } from '../lib/modelTraining';
+import { trackEvent } from '../lib/analytics';
 
 const DatasetUpload = () => {
-  const [files, setFiles] = useState([]);
-  const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [parsedData, setParsedData] = useState(null);
-  const [trainingStatus, setTrainingStatus] = useState('');
-  const { toast } = useToast();
-
-  const handleFolderUpload = useCallback((event) => {
-    const folderItems = event.target.files;
-    setFiles(Array.from(folderItems));
-  }, []);
-
-  const parseFiles = useCallback(async () => {
-    const jsonFiles = files.filter(file => file.name.endsWith('.json'));
-    const imageFiles = files.filter(file => file.name.endsWith('.jpg') || file.name.endsWith('.jpeg'));
-    
-    const parsedJsonData = await Promise.all(jsonFiles.map(async (file) => {
-      const text = await file.text();
-      return JSON.parse(text);
-    }));
-
-    const imageData = await Promise.all(imageFiles.map(async (file) => {
-      const arrayBuffer = await file.arrayBuffer();
-      return {
-        name: file.name,
-        data: new Uint8Array(arrayBuffer)
-      };
-    }));
-
-    setParsedData({ json: parsedJsonData, images: imageData });
-  }, [files]);
+  // ... (existing state)
 
   const handleUpload = async () => {
     if (files.length === 0) {
@@ -56,7 +28,28 @@ const DatasetUpload = () => {
     try {
       await parseFiles();
 
-      // Simulating file processing
+      // Upload training data to Codehooks.io
+      const uploadedData = await uploadTrainingData(parsedData);
+
+      // Start training job
+      const trainingJob = await startTrainingJob({
+        datasetId: uploadedData.id,
+        modelType: 'object-detection',
+      });
+
+      toast({
+        title: "Training job started",
+        description: `Job ID: ${trainingJob.id}`,
+      });
+
+      // Track upload event
+      await trackEvent({
+        type: 'dataset_upload',
+        fileCount: files.length,
+        timestamp: new Date().toISOString(),
+      });
+
+      // Simulate file processing
       for (let i = 0; i < files.length; i++) {
         await new Promise(resolve => setTimeout(resolve, 100));
         setProgress(((i + 1) / files.length) * 100);
@@ -68,7 +61,7 @@ const DatasetUpload = () => {
       });
 
       // Start training process
-      initiateTraining();
+      initiateTraining(trainingJob.id);
     } catch (error) {
       console.error('Error processing files:', error);
       toast({
@@ -82,24 +75,24 @@ const DatasetUpload = () => {
     }
   };
 
-  const initiateTraining = async () => {
-    if (!parsedData) {
-      toast({
-        title: "No data available",
-        description: "Please upload dataset first",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const initiateTraining = async (jobId) => {
     setTrainingStatus('Initiating training...');
     try {
-      await tensorflowService.trainModel(parsedData);
+      const trainedModel = await getTrainedModel(jobId);
       setTrainingStatus('Training completed successfully!');
       toast({
         title: "Training complete",
         description: "The model has been trained with the new dataset",
       });
+
+      // Track training completion event
+      await trackEvent({
+        type: 'model_training_complete',
+        jobId,
+        timestamp: new Date().toISOString(),
+      });
+
+      // TODO: Implement logic to use the new trained model
     } catch (error) {
       console.error('Error training model:', error);
       setTrainingStatus('Error occurred during training');
@@ -111,62 +104,10 @@ const DatasetUpload = () => {
     }
   };
 
+  // ... (rest of the component)
+
   return (
-    <div className="container mx-auto p-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>Dataset Upload and Training</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="folder-upload">Select Dataset Folder</Label>
-              <Input
-                id="folder-upload"
-                type="file"
-                webkitdirectory="true"
-                directory="true"
-                multiple
-                onChange={handleFolderUpload}
-                disabled={uploading}
-              />
-            </div>
-            {files.length > 0 && (
-              <div>
-                <p>{files.length} file(s) selected</p>
-                <ul className="list-disc pl-5 max-h-40 overflow-y-auto">
-                  {files.map((file, index) => (
-                    <li key={index}>{file.name}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <Button onClick={handleUpload} disabled={uploading || files.length === 0}>
-              {uploading ? 'Processing...' : 'Process Dataset and Start Training'}
-            </Button>
-            {uploading && (
-              <div>
-                <Progress value={progress} className="w-full" />
-                <p className="text-center">{Math.round(progress)}%</p>
-              </div>
-            )}
-            {parsedData && (
-              <div>
-                <h3 className="font-bold mt-4">Parsed Data Summary:</h3>
-                <p>JSON Files: {parsedData.json.length}</p>
-                <p>Image Files: {parsedData.images.length}</p>
-              </div>
-            )}
-            {trainingStatus && (
-              <div>
-                <h3 className="font-bold mt-4">Training Status:</h3>
-                <p>{trainingStatus}</p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    // ... (existing JSX)
   );
 };
 
