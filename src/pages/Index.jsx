@@ -1,108 +1,95 @@
 import { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { incrementCount, incrementManualCount } from '../store/countersSlice';
+import { useGetEvents, useCreateEvent } from '../integrations/supabase';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { Link } from 'react-router-dom';
-import { codehooksService } from '../services/codehooksService';
 
 const Index = () => {
-  const dispatch = useDispatch();
-  const counters = useSelector((state) => state.counters);
-  const selectedItem = useSelector((state) => state.settings.selectedItem);
+  const [events, setEvents] = useState([]);
+  const [newEventName, setNewEventName] = useState('');
+  const getEvents = useGetEvents();
+  const createEvent = useCreateEvent();
   const { toast } = useToast();
-  const [codehooksData, setCodehooksData] = useState(null);
 
   useEffect(() => {
-    console.log('Index component mounted');
-    const interval = setInterval(() => {
-      if (selectedItem && selectedItem !== 'glass_bottle') {
-        dispatch(incrementCount({ item: selectedItem, amount: Math.floor(Math.random() * 3) }));
-      }
-    }, 5000); // Update every 5 seconds
+    fetchEvents();
+  }, []);
 
-    // Fetch data from Codehooks
-    codehooksService.getData()
-      .then(data => {
-        setCodehooksData(data);
-        toast({
-          title: "Codehooks Data Fetched",
-          description: "Successfully retrieved data from Codehooks.",
-        });
-      })
-      .catch(error => {
-        console.error('Error fetching Codehooks data:', error);
-        toast({
-          title: "Error",
-          description: "Failed to fetch data from Codehooks.",
-          variant: "destructive",
-        });
+  const fetchEvents = async () => {
+    try {
+      const fetchedEvents = await getEvents();
+      setEvents(fetchedEvents);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch events.",
+        variant: "destructive",
       });
-
-    return () => clearInterval(interval);
-  }, [dispatch, selectedItem, toast]);
-
-  const handleManualIncrement = () => {
-    dispatch(incrementManualCount({ item: 'glass_bottle', date: new Date().toISOString().split('T')[0] }));
-    toast({
-      title: "Glass Bottle Count Incremented",
-      description: "The glass bottle count has been manually increased.",
-    });
+    }
   };
 
-  if (!counters) {
-    console.error('Counters is undefined');
-    return <div>Loading...</div>;
-  }
+  const handleCreateEvent = async (e) => {
+    e.preventDefault();
+    if (!newEventName.trim()) return;
+
+    try {
+      await createEvent({ name: newEventName, date: new Date().toISOString() });
+      setNewEventName('');
+      fetchEvents();
+      toast({
+        title: "Success",
+        description: "Event created successfully.",
+      });
+    } catch (error) {
+      console.error('Error creating event:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create event.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="container mx-auto p-4">
       <Card className="mb-4">
         <CardHeader>
-          <CardTitle>Recycling Counters</CardTitle>
+          <CardTitle>Create New Event</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {Object.entries(counters).map(([item, counts]) => (
-                <Card key={item}>
-                  <CardHeader>
-                    <CardTitle className="text-lg capitalize">{item.replace('_', ' ')}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center space-x-2">
-                      <Progress value={(Object.values(counts.counts).reduce((a, b) => a + b, 0) / 100) * 100} max={100} className="w-full" />
-                      <span className="text-sm font-medium">{Object.values(counts.counts).reduce((a, b) => a + b, 0)}</span>
-                    </div>
-                    {item === 'glass_bottle' && (
-                      <Button onClick={handleManualIncrement} className="mt-2">
-                        Increment Glass Bottle
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            <div className="flex justify-center">
-              <Link to="/results">
-                <Button>View Detailed Results</Button>
-              </Link>
-            </div>
-          </div>
+          <form onSubmit={handleCreateEvent} className="flex space-x-2">
+            <Input
+              type="text"
+              value={newEventName}
+              onChange={(e) => setNewEventName(e.target.value)}
+              placeholder="Enter event name"
+              className="flex-grow"
+            />
+            <Button type="submit">Create Event</Button>
+          </form>
         </CardContent>
       </Card>
-      {codehooksData && (
-        <Card className="mt-4">
-          <CardHeader>
-            <CardTitle>Codehooks Data</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <pre>{JSON.stringify(codehooksData, null, 2)}</pre>
-          </CardContent>
-        </Card>
-      )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Events</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {events.length > 0 ? (
+            <ul className="space-y-2">
+              {events.map((event) => (
+                <li key={event.id} className="bg-secondary p-2 rounded">
+                  {event.name} - {new Date(event.date).toLocaleDateString()}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No events found.</p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
