@@ -1,0 +1,1 @@
+export const WEBSOCKET_URL = 'wss://brave-atrium-8803.codehooks.io/websocket';
