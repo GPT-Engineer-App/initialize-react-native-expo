@@ -9,7 +9,27 @@ import { tensorflowService } from '../lib/tensorflowService';
 import { codehooksService } from '../lib/codehooksService';
 
 const DatasetUpload = () => {
-  // ... (previous state declarations)
+  const [files, setFiles] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [parsedData, setParsedData] = useState(null);
+  const [trainingStatus, setTrainingStatus] = useState('');
+  const { toast } = useToast();
+
+  const handleFileChange = (event) => {
+    setFiles(Array.from(event.target.files));
+  };
+
+  const parseFiles = useCallback(async () => {
+    // Implement file parsing logic here
+    // This is a placeholder implementation
+    const parsed = files.map(file => ({
+      name: file.name,
+      size: file.size,
+      type: file.type
+    }));
+    setParsedData(parsed);
+  }, [files]);
 
   const handleUpload = async () => {
     if (files.length === 0) {
@@ -111,10 +131,40 @@ const DatasetUpload = () => {
     }
   };
 
-  // ... (rest of the component implementation)
-
   return (
-    // ... (previous JSX)
+    <div className="container mx-auto p-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Dataset Upload</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="dataset-upload">Select Dataset Files</Label>
+              <Input
+                id="dataset-upload"
+                type="file"
+                multiple
+                onChange={handleFileChange}
+                disabled={uploading}
+              />
+            </div>
+            <Button onClick={handleUpload} disabled={uploading || files.length === 0}>
+              {uploading ? 'Uploading...' : 'Upload Dataset'}
+            </Button>
+            {uploading && (
+              <Progress value={progress} max={100} className="w-full" />
+            )}
+            {trainingStatus && (
+              <div className="mt-4">
+                <h3 className="text-lg font-medium">Training Status</h3>
+                <p>{trainingStatus}</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
