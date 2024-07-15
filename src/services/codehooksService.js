@@ -9,6 +9,7 @@ export const codehooksService = {
   // GET Request
   getData: async (collection) => {
     try {
+      console.log(`Fetching data from collection: ${collection}`);
       const response = await fetch(`${API_BASE_URL}/${collection}`, { 
         method: 'GET', 
         headers
@@ -16,7 +17,9 @@ export const codehooksService = {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return response.json();
+      const data = await response.json();
+      console.log(`Data fetched from ${collection}:`, data);
+      return data;
     } catch (error) {
       console.error('Fetch error:', error);
       throw error;
