@@ -15,7 +15,24 @@ import { Slider } from "@/components/ui/slider";
 import { toPng } from 'html-to-image';
 
 const TensorflowDemo = () => {
-  // ... (previous state and refs)
+  const [isModelLoaded, setIsModelLoaded] = useState(false);
+  const [isDetecting, setIsDetecting] = useState(false);
+  const [capturedScreenshot, setCapturedScreenshot] = useState(null);
+  const [screenshotMetadata, setScreenshotMetadata] = useState({
+    itemType: '',
+    quantity: '',
+    lighting: '',
+    background: '',
+    additionalNotes: ''
+  });
+  const [isScreenshotDialogOpen, setIsScreenshotDialogOpen] = useState(false);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+
+  const dispatch = useDispatch();
+  const selectedItem = useSelector((state) => state.settings.selectedItem);
+  const detectionArea = useSelector((state) => state.settings.detectionArea);
+  const { toast } = useToast();
 
   useEffect(() => {
     const loadModel = async () => {
@@ -26,7 +43,6 @@ const TensorflowDemo = () => {
           title: "Model loaded successfully",
           description: "Ready to start object detection",
         });
-        // Track model load event
         await codehooksService.trackAnalytics({ event: 'model_loaded' });
       } catch (error) {
         console.error('Error loading the model:', error);
@@ -38,12 +54,14 @@ const TensorflowDemo = () => {
       }
     };
     loadModel();
-  }, []);
+  }, [toast]);
 
   const startDetection = async () => {
-    // ... (previous implementation)
     try {
-      // ... (existing code)
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      videoRef.current.srcObject = stream;
+      videoRef.current.play();
+      setIsDetecting(true);
       await codehooksService.trackAnalytics({ event: 'detection_started' });
     } catch (error) {
       console.error('Error accessing the camera:', error);
@@ -56,23 +74,33 @@ const TensorflowDemo = () => {
   };
 
   const stopDetection = async () => {
-    // ... (previous implementation)
+    const stream = videoRef.current.srcObject;
+    const tracks = stream.getTracks();
+    tracks.forEach(track => track.stop());
+    setIsDetecting(false);
     await codehooksService.trackAnalytics({ event: 'detection_stopped' });
   };
 
   const detectFrame = async () => {
-    // ... (previous implementation)
+    if (!isDetecting || !videoRef.current || !canvasRef.current) return;
+
+    const detectedObjects = await tensorflowService.detectObjects(videoRef.current, selectedItem);
+    const itemsInArea = detectedObjects.filter(obj => 
+      obj.bbox[0] >= detectionArea.x && 
+      obj.bbox[1] >= detectionArea.y && 
+      obj.bbox[0] + obj.bbox[2] <= detectionArea.x + detectionArea.width && 
+      obj.bbox[1] + obj.bbox[3] <= detectionArea.y + detectionArea.height
+    ).length;
+
     if (itemsInArea > 0) {
       dispatch(incrementCount({ item: selectedItem, amount: itemsInArea }));
       
-      // Store detection result
       await codehooksService.storeDetectionResult({
         item: selectedItem,
         count: itemsInArea,
         timestamp: new Date().toISOString(),
       });
 
-      // Send notification
       await codehooksService.sendNotification(
         'user123', // Replace with actual user ID
         `${itemsInArea} ${selectedItem.replace('_', ' ')}(s) detected`
@@ -83,13 +111,13 @@ const TensorflowDemo = () => {
         description: `${itemsInArea} item(s) detected in the area`,
       });
     }
-    // ... (rest of the implementation)
+
+    requestAnimationFrame(detectFrame);
   };
 
   const handleSaveScreenshot = async () => {
     try {
       await tensorflowService.improveModel(capturedScreenshot, screenshotMetadata);
-      // Store training data
       await codehooksService.storeTrainingData({
         screenshot: capturedScreenshot,
         metadata: screenshotMetadata,
@@ -121,7 +149,9 @@ const TensorflowDemo = () => {
   // ... (rest of the component implementation)
 
   return (
-    // ... (previous JSX)
+    <div>
+      {/* Add your JSX for the TensorflowDemo component */}
+    </div>
   );
 };
 
