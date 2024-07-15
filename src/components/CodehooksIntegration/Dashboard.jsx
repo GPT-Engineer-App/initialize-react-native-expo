@@ -15,15 +15,18 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const storageData = await codehooksService.getCollectionData('storage_usage');
-        const notificationsData = await codehooksService.getCollectionData('notifications');
-        const modelData = await codehooksService.getCollectionData('model_status');
-        const feedbackData = await codehooksService.getCollectionData('feedback');
+        console.log('Fetching metrics...');
+        const storageData = await codehooksService.getData('storage_usage');
+        const notificationsData = await codehooksService.getData('notifications');
+        const modelData = await codehooksService.getData('model_status');
+        const feedbackData = await codehooksService.getData('feedback');
+
+        console.log('Fetched data:', { storageData, notificationsData, modelData, feedbackData });
 
         setMetrics({
-          storageUsage: storageData.usage || 0,
+          storageUsage: storageData[0]?.usage || 0,
           recentNotifications: notificationsData.slice(0, 5) || [],
-          modelStatus: modelData.status || 'Unknown',
+          modelStatus: modelData[0]?.status || 'Unknown',
           feedbackStats: {
             positive: feedbackData.filter(f => f.rating > 3).length,
             negative: feedbackData.filter(f => f.rating <= 3).length
