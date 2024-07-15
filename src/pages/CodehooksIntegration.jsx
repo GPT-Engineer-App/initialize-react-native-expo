@@ -1,86 +1,43 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Dashboard from '../components/CodehooksIntegration/Dashboard';
 
 const CodehooksIntegration = () => {
-  const [apiKey, setApiKey] = useState('');
-  const [endpoint, setEndpoint] = useState('');
-  const { toast } = useToast();
-
-  const handleSaveConfig = () => {
-    // TODO: Implement saving API configuration
-    toast({
-      title: "Configuration Saved",
-      description: "Your Codehooks.io configuration has been saved.",
-    });
-  };
-
   return (
     <div className="container mx-auto p-4">
       <Card>
         <CardHeader>
           <CardTitle>Codehooks.io Integration</CardTitle>
+          <CardDescription>Manage your Codehooks.io integration and settings</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="api-config">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="api-config">API Configuration</TabsTrigger>
-              <TabsTrigger value="data-management">Data Management</TabsTrigger>
+          <Tabs defaultValue="dashboard">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+              <TabsTrigger value="logs">Logs</TabsTrigger>
+              <TabsTrigger value="users">Users</TabsTrigger>
+              <TabsTrigger value="endpoints">Endpoints</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
-            <TabsContent value="api-config">
-              <Card>
-                <CardHeader>
-                  <CardTitle>API Configuration</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="api-key">API Key</Label>
-                    <Input
-                      id="api-key"
-                      value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
-                      placeholder="Enter your Codehooks.io API key"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="endpoint">Endpoint</Label>
-                    <Input
-                      id="endpoint"
-                      value={endpoint}
-                      onChange={(e) => setEndpoint(e.target.value)}
-                      placeholder="Enter your Codehooks.io endpoint"
-                    />
-                  </div>
-                  <Button onClick={handleSaveConfig}>Save Configuration</Button>
-                </CardContent>
-              </Card>
+            <TabsContent value="dashboard">
+              <Dashboard />
             </TabsContent>
-            <TabsContent value="data-management">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Data Management</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {/* TODO: Implement data management functionality */}
-                  <p>Data management features coming soon...</p>
-                </CardContent>
-              </Card>
+            <TabsContent value="logs">
+              {/* Logs component will be added here */}
+              <p>Logs content coming soon...</p>
+            </TabsContent>
+            <TabsContent value="users">
+              {/* User Management component will be added here */}
+              <p>User Management content coming soon...</p>
+            </TabsContent>
+            <TabsContent value="endpoints">
+              {/* Custom Endpoints component will be added here */}
+              <p>Custom Endpoints content coming soon...</p>
             </TabsContent>
             <TabsContent value="settings">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Settings</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {/* TODO: Implement settings and customization options */}
-                  <p>Settings and customization options coming soon...</p>
-                </CardContent>
-              </Card>
+              {/* Settings component will be added here */}
+              <p>Settings content coming soon...</p>
             </TabsContent>
           </Tabs>
         </CardContent>
