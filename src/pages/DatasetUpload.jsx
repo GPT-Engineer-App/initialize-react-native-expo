@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { tensorflowService } from '../lib/tensorflowService';
+import { modelTrainingService } from '../services/modelTrainingService';
 
 const DatasetUpload = () => {
   const [files, setFiles] = useState([]);
@@ -13,6 +13,7 @@ const DatasetUpload = () => {
   const [progress, setProgress] = useState(0);
   const [parsedData, setParsedData] = useState(null);
   const [trainingStatus, setTrainingStatus] = useState('');
+  const [trainingJobId, setTrainingJobId] = useState(null);
   const { toast } = useToast();
 
   const handleFolderUpload = useCallback((event) => {
@@ -62,9 +63,12 @@ const DatasetUpload = () => {
         setProgress(((i + 1) / files.length) * 100);
       }
 
+      // Upload training data
+      const uploadResult = await modelTrainingService.uploadTrainingData(parsedData);
+      
       toast({
         title: "Upload complete",
-        description: `${files.length} files processed successfully`,
+        description: `${files.length} files processed and uploaded successfully`,
       });
 
       // Start training process
@@ -94,18 +98,65 @@ const DatasetUpload = () => {
 
     setTrainingStatus('Initiating training...');
     try {
-      await tensorflowService.trainModel(parsedData);
-      setTrainingStatus('Training completed successfully!');
+      const result = await modelTrainingService.startTrainingJob();
+      setTrainingJobId(result.jobId);
+      setTrainingStatus('Training job started. Job ID: ' + result.jobId);
       toast({
-        title: "Training complete",
-        description: "The model has been trained with the new dataset",
+        title: "Training started",
+        description: "The model training job has been initiated",
       });
     } catch (error) {
-      console.error('Error training model:', error);
-      setTrainingStatus('Error occurred during training');
+      console.error('Error starting training job:', error);
+      setTrainingStatus('Error occurred while starting training');
       toast({
         title: "Training error",
-        description: "An error occurred while training the model",
+        description: "An error occurred while starting the training job",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const checkTrainingStatus = async () => {
+    if (!trainingJobId) {
+      toast({
+        title: "No active training job",
+        description: "Please start a training job first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const status = await modelTrainingService.getTrainingStatus(trainingJobId);
+      setTrainingStatus(`Training status: ${status}`);
+      toast({
+        title: "Training status",
+        description: `Current status: ${status}`,
+      });
+    } catch (error) {
+      console.error('Error checking training status:', error);
+      toast({
+        title: "Status check error",
+        description: "An error occurred while checking the training status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getTrainedModel = async () => {
+    try {
+      const model = await modelTrainingService.getTrainedModel();
+      setTrainingStatus('Trained model retrieved successfully');
+      toast({
+        title: "Model retrieved",
+        description: "The trained model has been successfully retrieved",
+      });
+      // Here you can add logic to use or display the retrieved model
+    } catch (error) {
+      console.error('Error retrieving trained model:', error);
+      toast({
+        title: "Model retrieval error",
+        description: "An error occurred while retrieving the trained model",
         variant: "destructive",
       });
     }
@@ -142,7 +193,7 @@ const DatasetUpload = () => {
               </div>
             )}
             <Button onClick={handleUpload} disabled={uploading || files.length === 0}>
-              {uploading ? 'Processing...' : 'Process Dataset and Start Training'}
+              {uploading ? 'Processing...' : 'Process Dataset and Upload'}
             </Button>
             {uploading && (
               <div>
@@ -150,13 +201,15 @@ const DatasetUpload = () => {
                 <p className="text-center">{Math.round(progress)}%</p>
               </div>
             )}
-            {parsedData && (
-              <div>
-                <h3 className="font-bold mt-4">Parsed Data Summary:</h3>
-                <p>JSON Files: {parsedData.json.length}</p>
-                <p>Image Files: {parsedData.images.length}</p>
-              </div>
-            )}
+            <Button onClick={initiateTraining} disabled={!parsedData}>
+              Start Training Job
+            </Button>
+            <Button onClick={checkTrainingStatus} disabled={!trainingJobId}>
+              Check Training Status
+            </Button>
+            <Button onClick={getTrainedModel}>
+              Retrieve Trained Model
+            </Button>
             {trainingStatus && (
               <div>
                 <h3 className="font-bold mt-4">Training Status:</h3>
