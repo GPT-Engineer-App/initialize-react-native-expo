@@ -1,22 +1,25 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { tensorflowService } from '../lib/tensorflowService';
 import { uploadTrainingData, startTrainingJob, getTrainedModel } from '../lib/modelTraining';
 import { trackEvent } from '../lib/analytics';
 
 const DatasetUpload = () => {
-  // ... (existing state)
+  const [files, setFiles] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [trainingStatus, setTrainingStatus] = useState('');
+  const { toast } = useToast();
 
   const handleUpload = async () => {
     if (files.length === 0) {
       toast({
         title: "No files selected",
-        description: "Please select a folder to upload",
+        description: "Please select files to upload",
         variant: "destructive",
       });
       return;
@@ -26,12 +29,8 @@ const DatasetUpload = () => {
     setProgress(0);
 
     try {
-      await parseFiles();
-
-      // Upload training data to Codehooks.io
+      const parsedData = await parseFiles(files);
       const uploadedData = await uploadTrainingData(parsedData);
-
-      // Start training job
       const trainingJob = await startTrainingJob({
         datasetId: uploadedData.id,
         modelType: 'object-detection',
@@ -42,14 +41,12 @@ const DatasetUpload = () => {
         description: `Job ID: ${trainingJob.id}`,
       });
 
-      // Track upload event
       await trackEvent({
         type: 'dataset_upload',
         fileCount: files.length,
         timestamp: new Date().toISOString(),
       });
 
-      // Simulate file processing
       for (let i = 0; i < files.length; i++) {
         await new Promise(resolve => setTimeout(resolve, 100));
         setProgress(((i + 1) / files.length) * 100);
@@ -60,7 +57,6 @@ const DatasetUpload = () => {
         description: `${files.length} files processed successfully`,
       });
 
-      // Start training process
       initiateTraining(trainingJob.id);
     } catch (error) {
       console.error('Error processing files:', error);
@@ -85,7 +81,6 @@ const DatasetUpload = () => {
         description: "The model has been trained with the new dataset",
       });
 
-      // Track training completion event
       await trackEvent({
         type: 'model_training_complete',
         jobId,
@@ -104,10 +99,25 @@ const DatasetUpload = () => {
     }
   };
 
-  // ... (rest of the component)
+  const parseFiles = async (files) => {
+    // Implement file parsing logic here
+    return [];
+  };
 
   return (
-    // ... (existing JSX)
+    <Card>
+      <CardHeader>
+        <CardTitle>Dataset Upload</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Input type="file" multiple onChange={(e) => setFiles(e.target.files)} />
+        <Button onClick={handleUpload} disabled={uploading}>
+          {uploading ? 'Uploading...' : 'Upload Dataset'}
+        </Button>
+        {uploading && <Progress value={progress} className="w-full" />}
+        {trainingStatus && <p>{trainingStatus}</p>}
+      </CardContent>
+    </Card>
   );
 };
 
