@@ -1,4 +1,5 @@
 import { API_BASE_URL, ENDPOINTS, getHeaders } from '../config/api';
+import { queueService } from './queueService';
 
 class ModelTrainingService {
   async uploadTrainingData(data) {
@@ -20,14 +21,9 @@ class ModelTrainingService {
 
   async startTrainingJob() {
     try {
-      const response = await fetch(`${API_BASE_URL}${ENDPOINTS.MODEL_TRAINING}/start`, {
-        method: 'POST',
-        headers: getHeaders(),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
+      // Enqueue the training job
+      const job = await queueService.enqueue('model-training', { action: 'start-training' });
+      return { jobId: job.id };
     } catch (error) {
       console.error('Start training job error:', error);
       throw error;

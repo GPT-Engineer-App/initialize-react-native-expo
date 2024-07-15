@@ -1,4 +1,5 @@
 import { API_BASE_URL, getHeaders } from '../config/api';
+import { queueService } from './queueService';
 
 class DataStorageService {
   async create(collection, data) {
@@ -64,6 +65,17 @@ class DataStorageService {
       return response.json();
     } catch (error) {
       console.error('Delete error:', error);
+      throw error;
+    }
+  }
+
+  async processData(collection, action, data) {
+    try {
+      // Enqueue data processing task
+      await queueService.enqueue('data-processing', { collection, action, data });
+      return { success: true, message: 'Data processing task queued' };
+    } catch (error) {
+      console.error('Data processing error:', error);
       throw error;
     }
   }

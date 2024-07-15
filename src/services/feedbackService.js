@@ -1,17 +1,12 @@
 import { API_BASE_URL, COLLECTIONS, getHeaders } from '../config/api';
+import { queueService } from './queueService';
 
 class FeedbackService {
   async submitFeedback(feedback) {
     try {
-      const response = await fetch(`${API_BASE_URL}/${COLLECTIONS.FEEDBACK}`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify(feedback),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
+      // Enqueue feedback processing
+      await queueService.enqueue('feedback-processing', feedback);
+      return { success: true, message: 'Feedback queued for processing' };
     } catch (error) {
       console.error('Submit feedback error:', error);
       throw error;

@@ -1,17 +1,12 @@
 import { API_BASE_URL, ENDPOINTS, getHeaders } from '../config/api';
+import { queueService } from './queueService';
 
 class NotificationService {
   async sendNotification(userId, message) {
     try {
-      const response = await fetch(`${API_BASE_URL}${ENDPOINTS.NOTIFICATIONS}`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify({ userId, message }),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
+      // Enqueue the notification
+      await queueService.enqueue('notifications', { userId, message });
+      return { success: true, message: 'Notification queued for delivery' };
     } catch (error) {
       console.error('Send notification error:', error);
       throw error;
