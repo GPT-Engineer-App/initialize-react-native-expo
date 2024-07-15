@@ -5,15 +5,8 @@ export const API_TOKEN = '03760956-bbdc-4fad-a4af-fea9c9fd4240';
 
 export const COLLECTIONS = {
   USERS: 'users',
-  TRAINING_DATA: 'training_data',
-  DETECTION_RESULTS: 'detection_results',
-  FEEDBACK: 'feedback',
-  ANALYTICS: 'analytics',
-};
-
-export const ENDPOINTS = {
-  MODEL_TRAINING: '/model_training',
-  NOTIFICATIONS: '/notifications',
+  DETECTION_AREAS: 'detection_areas',
+  ITEMS: 'items',
 };
 
 export const getHeaders = () => ({
