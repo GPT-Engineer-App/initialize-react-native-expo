@@ -34,6 +34,22 @@ class ModelTrainingService {
     }
   }
 
+  async getTrainingStatus(jobId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}${ENDPOINTS.MODEL_TRAINING}/status/${jobId}`, {
+        method: 'GET',
+        headers: getHeaders(),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Get training status error:', error);
+      throw error;
+    }
+  }
+
   async getTrainedModel() {
     try {
       const response = await fetch(`${API_BASE_URL}${ENDPOINTS.MODEL_TRAINING}/model`, {

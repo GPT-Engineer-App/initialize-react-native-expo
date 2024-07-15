@@ -9,6 +9,10 @@ export const COLLECTIONS = {
   ITEMS: 'items',
 };
 
+export const ENDPOINTS = {
+  MODEL_TRAINING: '/model-training',
+};
+
 export const getHeaders = () => ({
   'x-apikey': API_TOKEN,
   'Content-Type': 'application/json',
