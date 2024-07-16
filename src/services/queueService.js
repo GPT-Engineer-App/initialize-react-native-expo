@@ -1,8 +1,8 @@
-import { API_BASE_URL, API_TOKEN, ENDPOINTS } from '../config/api';
+import { API_BASE_URL, API_TOKEN } from '../config/api';
 
 class QueueService {
   constructor() {
-    this.baseUrl = `${API_BASE_URL}${ENDPOINTS.QUEUE}`;
+    this.baseUrl = `${API_BASE_URL}/queue`;
     this.headers = {
       'Content-Type': 'application/json',
       'x-apikey': API_TOKEN,
@@ -18,8 +18,7 @@ class QueueService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message || 'Unknown error'}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       return await response.json();
@@ -37,8 +36,7 @@ class QueueService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message || 'Unknown error'}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       return await response.json();

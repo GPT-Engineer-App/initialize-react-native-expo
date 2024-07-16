@@ -5,7 +5,6 @@ import Layout from "./layouts/navbar"; // available: clean, navbar, sidebar
 import { navItems } from "./nav-items";
 import { Provider } from 'react-redux';
 import { store } from './store/store';
-import RealTimeNotifications from './components/RealTimeNotifications';
 
 const queryClient = new QueryClient();
 
@@ -14,7 +13,6 @@ const App = () => {
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         <Toaster />
-        <RealTimeNotifications />
         <Router>
           <Routes>
             <Route element={<Layout />}>

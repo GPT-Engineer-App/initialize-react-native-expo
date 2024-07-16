@@ -10,8 +10,7 @@ class ModelTrainingService {
         body: JSON.stringify(data),
       });
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message || 'Unknown error'}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
     } catch (error) {
