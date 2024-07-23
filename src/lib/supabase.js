@@ -1,6 +1,2 @@
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_PROJECT_URL
-const supabaseKey = import.meta.env.VITE_SUPABASE_API_KEY
-
-export const supabase = createClient(supabaseUrl, supabaseKey)
+// This file is no longer needed as we're replacing Supabase with EngineLabs.ai
+// The EngineLabs.ai configuration is now in src/config/enginelabs.js
