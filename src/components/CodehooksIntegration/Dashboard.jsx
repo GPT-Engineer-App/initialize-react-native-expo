@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Bell, Brain, MessageSquare, Database } from "lucide-react";
 import { engineLabsService } from '../../services/engineLabsService';
+import { COLLECTIONS } from '../../config/enginelabs';
 
 const Dashboard = () => {
   const [metrics, setMetrics] = useState({
