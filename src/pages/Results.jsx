@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -7,16 +7,42 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import { fetchObjectSummary } from '../api/objects';
 
 const Results = () => {
   const counters = useSelector((state) => state.counters);
   const { toast } = useToast();
   const [chartType, setChartType] = useState('bar');
   const [timeRange, setTimeRange] = useState('all');
+  const [objectSummary, setObjectSummary] = useState(null);
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
+  useEffect(() => {
+    const fetchSummary = async () => {
+      try {
+        const summary = await fetchObjectSummary();
+        setObjectSummary(summary);
+      } catch (error) {
+        console.error('Error fetching object summary:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch object summary data.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchSummary();
+  }, [toast]);
+
   const prepareChartData = () => {
+    if (objectSummary) {
+      return Object.entries(objectSummary).map(([key, value]) => ({
+        name: key,
+        count: value,
+      }));
+    }
     return Object.entries(counters).map(([key, value]) => ({
       name: key.replace('_', ' '),
       count: Object.values(value.counts).reduce((a, b) => a + b, 0),
@@ -99,9 +125,9 @@ const Results = () => {
 
   const exportToCSV = () => {
     const headers = ['Item', 'Total Count'];
-    const rows = Object.entries(counters).map(([item, counts]) => [
+    const rows = Object.entries(objectSummary || counters).map(([item, counts]) => [
       item,
-      Object.values(counts.counts).reduce((a, b) => a + b, 0)
+      typeof counts === 'number' ? counts : Object.values(counts.counts).reduce((a, b) => a + b, 0)
     ]);
 
     const csvContent = [
@@ -176,10 +202,12 @@ const Results = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {Object.entries(counters).map(([item, counts]) => (
+                  {Object.entries(objectSummary || counters).map(([item, counts]) => (
                     <TableRow key={item}>
                       <TableCell className="font-medium capitalize">{item.replace('_', ' ')}</TableCell>
-                      <TableCell>{Object.values(counts.counts).reduce((a, b) => a + b, 0)}</TableCell>
+                      <TableCell>
+                        {typeof counts === 'number' ? counts : Object.values(counts.counts).reduce((a, b) => a + b, 0)}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
