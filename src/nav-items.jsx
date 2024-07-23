@@ -5,7 +5,7 @@ import SettingsPage from "./pages/Settings.jsx";
 import TensorflowDemo from "./pages/TensorflowDemo.jsx";
 import HelpTutorial from "./pages/HelpTutorial.jsx";
 import DatasetUpload from "./pages/DatasetUpload.jsx";
-import CodehooksIntegration from "./pages/CodehooksIntegration.jsx";
+import EnginelabsIntegration from "./pages/CodehooksIntegration.jsx";
 
 export const navItems = [
   {
@@ -45,9 +45,9 @@ export const navItems = [
     page: <DatasetUpload />,
   },
   {
-    title: "Codehooks.io",
-    to: "/codehooks",
+    title: "EngineLabs.ai",
+    to: "/enginelabs",
     icon: <Cloud className="h-4 w-4" />,
-    page: <CodehooksIntegration />,
+    page: <EnginelabsIntegration />,
   },
 ];

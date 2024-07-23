@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Bell, Brain, MessageSquare, Database } from "lucide-react";
-import { codehooksService } from '../../services/codehooksService';
+import { engineLabsService } from '../../services/engineLabsService';
+import { COLLECTIONS } from '../../config/enginelabs';
 
 const Dashboard = () => {
   const [metrics, setMetrics] = useState({
@@ -15,19 +16,16 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const storageData = await codehooksService.getCollectionData('storage_usage');
-        const notificationsData = await codehooksService.getCollectionData('notifications');
-        const modelData = await codehooksService.getCollectionData('model_status');
-        const feedbackData = await codehooksService.getCollectionData('feedback');
+        const storageData = await engineLabsService.read(COLLECTIONS.ITEMS);
+        const notificationsData = await engineLabsService.getNotifications();
+        const modelData = await engineLabsService.getTrainingStatus();
+        const feedbackData = await engineLabsService.getFeedback();
 
         setMetrics({
-          storageUsage: storageData.usage || 0,
+          storageUsage: calculateStorageUsage(storageData),
           recentNotifications: notificationsData.slice(0, 5) || [],
           modelStatus: modelData.status || 'Unknown',
-          feedbackStats: {
-            positive: feedbackData.filter(f => f.rating > 3).length,
-            negative: feedbackData.filter(f => f.rating <= 3).length
-          }
+          feedbackStats: calculateFeedbackStats(feedbackData)
         });
       } catch (error) {
         console.error('Error fetching dashboard metrics:', error);
@@ -37,6 +35,17 @@ const Dashboard = () => {
     fetchMetrics();
   }, []);
 
+  const calculateStorageUsage = (data) => {
+    // Implement logic to calculate storage usage based on EngineLabs.ai data
+    return (data.length / 1000) * 100; // Example calculation
+  };
+
+  const calculateFeedbackStats = (data) => {
+    const positive = data.filter(f => f.rating > 3).length;
+    const negative = data.filter(f => f.rating <= 3).length;
+    return { positive, negative };
+  };
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
@@ -45,7 +54,7 @@ const Dashboard = () => {
           <Database className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{metrics.storageUsage}%</div>
+          <div className="text-2xl font-bold">{metrics.storageUsage.toFixed(2)}%</div>
           <Progress value={metrics.storageUsage} className="mt-2" />
         </CardContent>
       </Card>
