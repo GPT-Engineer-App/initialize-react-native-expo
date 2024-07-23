@@ -6,14 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from 'react-router-dom';
-import { codehooksService } from '../services/codehooksService';
+import { engineLabsService } from '../services/engineLabsService';
 
 const Index = () => {
   const dispatch = useDispatch();
   const counters = useSelector((state) => state.counters);
   const selectedItem = useSelector((state) => state.settings.selectedItem);
   const { toast } = useToast();
-  const [codehooksData, setCodehooksData] = useState(null);
+  const [engineLabsData, setEngineLabsData] = useState(null);
 
   useEffect(() => {
     console.log('Index component mounted');
@@ -23,20 +23,20 @@ const Index = () => {
       }
     }, 5000); // Update every 5 seconds
 
-    // Fetch data from Codehooks
-    codehooksService.getData()
+    // Fetch data from EngineLabs
+    engineLabsService.read(COLLECTIONS.ITEMS)
       .then(data => {
-        setCodehooksData(data);
+        setEngineLabsData(data);
         toast({
-          title: "Codehooks Data Fetched",
-          description: "Successfully retrieved data from Codehooks.",
+          title: "EngineLabs Data Fetched",
+          description: "Successfully retrieved data from EngineLabs.",
         });
       })
       .catch(error => {
-        console.error('Error fetching Codehooks data:', error);
+        console.error('Error fetching EngineLabs data:', error);
         toast({
           title: "Error",
-          description: "Failed to fetch data from Codehooks.",
+          description: "Failed to fetch data from EngineLabs.",
           variant: "destructive",
         });
       });
@@ -93,13 +93,13 @@ const Index = () => {
           </div>
         </CardContent>
       </Card>
-      {codehooksData && (
+      {engineLabsData && (
         <Card className="mt-4">
           <CardHeader>
-            <CardTitle>Codehooks Data</CardTitle>
+            <CardTitle>EngineLabs Data</CardTitle>
           </CardHeader>
           <CardContent>
-            <pre>{JSON.stringify(codehooksData, null, 2)}</pre>
+            <pre>{JSON.stringify(engineLabsData, null, 2)}</pre>
           </CardContent>
         </Card>
       )}
