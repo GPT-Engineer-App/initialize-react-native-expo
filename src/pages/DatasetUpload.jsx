@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { modelTrainingService } from '../services/modelTrainingService';
+import { createTrainingData, getAllTrainingData, deleteTrainingData } from '../api/trainingData';
 
 const DatasetUpload = () => {
   const [files, setFiles] = useState([]);
@@ -14,7 +15,26 @@ const DatasetUpload = () => {
   const [parsedData, setParsedData] = useState(null);
   const [trainingStatus, setTrainingStatus] = useState('');
   const [trainingJobId, setTrainingJobId] = useState(null);
+  const [trainingDataList, setTrainingDataList] = useState([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetchTrainingData();
+  }, []);
+
+  const fetchTrainingData = async () => {
+    try {
+      const data = await getAllTrainingData();
+      setTrainingDataList(data);
+    } catch (error) {
+      console.error('Error fetching training data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch training data",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleFolderUpload = useCallback((event) => {
     const folderItems = event.target.files;
@@ -64,12 +84,15 @@ const DatasetUpload = () => {
       }
 
       // Upload training data
-      const uploadResult = await modelTrainingService.uploadTrainingData(parsedData);
+      const uploadResult = await createTrainingData(JSON.stringify(parsedData));
       
       toast({
         title: "Upload complete",
         description: `${files.length} files processed and uploaded successfully`,
       });
+
+      // Refresh the training data list
+      fetchTrainingData();
 
       // Start training process
       initiateTraining();
@@ -162,6 +185,24 @@ const DatasetUpload = () => {
     }
   };
 
+  const handleDeleteTrainingData = async (id) => {
+    try {
+      await deleteTrainingData(id);
+      toast({
+        title: "Training data deleted",
+        description: "The training data has been successfully deleted",
+      });
+      fetchTrainingData();
+    } catch (error) {
+      console.error('Error deleting training data:', error);
+      toast({
+        title: "Delete error",
+        description: "An error occurred while deleting the training data",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="container mx-auto p-4">
       <Card>
@@ -217,6 +258,24 @@ const DatasetUpload = () => {
               </div>
             )}
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Training Data List</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-2">
+            {trainingDataList.map((item) => (
+              <li key={item.id} className="flex justify-between items-center">
+                <span>Training Data ID: {item.id}</span>
+                <Button onClick={() => handleDeleteTrainingData(item.id)} variant="destructive">
+                  Delete
+                </Button>
+              </li>
+            ))}
+          </ul>
         </CardContent>
       </Card>
     </div>
