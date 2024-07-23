@@ -1,51 +1,51 @@
-import { supabase } from '../lib/supabase'
+import { engineLabsService } from '../services/engineLabsService';
+import { COLLECTIONS } from '../config/enginelabs';
 
 export const createTrainingData = async (data) => {
-  const { data: createdData, error } = await supabase
-    .from('training_data')
-    .insert({ data })
-    .single()
-
-  if (error) throw error
-  return createdData
-}
+  try {
+    const createdData = await engineLabsService.create(COLLECTIONS.ITEMS, { data });
+    return createdData;
+  } catch (error) {
+    console.error('Error creating training data:', error);
+    throw error;
+  }
+};
 
 export const getAllTrainingData = async () => {
-  const { data, error } = await supabase
-    .from('training_data')
-    .select('*')
-
-  if (error) throw error
-  return data
-}
+  try {
+    const data = await engineLabsService.read(COLLECTIONS.ITEMS);
+    return data;
+  } catch (error) {
+    console.error('Error getting all training data:', error);
+    throw error;
+  }
+};
 
 export const getTrainingDataById = async (id) => {
-  const { data, error } = await supabase
-    .from('training_data')
-    .select('*')
-    .eq('id', id)
-    .single()
-
-  if (error) throw error
-  return data
-}
+  try {
+    const data = await engineLabsService.read(COLLECTIONS.ITEMS, id);
+    return data;
+  } catch (error) {
+    console.error('Error getting training data by id:', error);
+    throw error;
+  }
+};
 
 export const updateTrainingData = async (id, data) => {
-  const { data: updatedData, error } = await supabase
-    .from('training_data')
-    .update({ data })
-    .eq('id', id)
-    .single()
-
-  if (error) throw error
-  return updatedData
-}
+  try {
+    const updatedData = await engineLabsService.update(COLLECTIONS.ITEMS, id, { data });
+    return updatedData;
+  } catch (error) {
+    console.error('Error updating training data:', error);
+    throw error;
+  }
+};
 
 export const deleteTrainingData = async (id) => {
-  const { error } = await supabase
-    .from('training_data')
-    .delete()
-    .eq('id', id)
-
-  if (error) throw error
-}
+  try {
+    await engineLabsService.delete(COLLECTIONS.ITEMS, id);
+  } catch (error) {
+    console.error('Error deleting training data:', error);
+    throw error;
+  }
+};
