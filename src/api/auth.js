@@ -43,3 +43,11 @@ export async function signupUser(email, password) {
     throw error;
   }
 }
+
+export async function logoutUser() {
+  localStorage.removeItem('accessToken');
+}
+
+export function isAuthenticated() {
+  return !!localStorage.getItem('accessToken');
+}

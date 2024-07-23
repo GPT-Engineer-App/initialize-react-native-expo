@@ -15,11 +15,13 @@ const Results = () => {
   const [chartType, setChartType] = useState('bar');
   const [timeRange, setTimeRange] = useState('all');
   const [objectSummary, setObjectSummary] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
   useEffect(() => {
     const fetchSummary = async () => {
+      setIsLoading(true);
       try {
         const summary = await fetchObjectSummary();
         setObjectSummary(summary);
@@ -30,6 +32,8 @@ const Results = () => {
           description: "Failed to fetch object summary data.",
           variant: "destructive",
         });
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -152,6 +156,10 @@ const Results = () => {
       description: "Detection data has been exported to CSV.",
     });
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="container mx-auto p-4">
