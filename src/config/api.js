@@ -1,7 +1,7 @@
-// API Configuration for Codehooks.io integration
+// API Configuration
 
-export const API_BASE_URL = 'https://brave-atrium-8803.codehooks.io';
-export const API_TOKEN = '03760956-bbdc-4fad-a4af-fea9c9fd4240';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+export const API_TOKEN = import.meta.env.VITE_API_TOKEN;
 
 export const COLLECTIONS = {
   USERS: 'users',
@@ -11,6 +11,7 @@ export const COLLECTIONS = {
 
 export const ENDPOINTS = {
   MODEL_TRAINING: '/model-training',
+  LOGIN: '/login',
 };
 
 export const getHeaders = () => ({
