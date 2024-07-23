@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from 'react-router-dom';
 import { engineLabsService } from '../services/engineLabsService';
+import { COLLECTIONS } from '../config/enginelabs';
 
 const Index = () => {
   const dispatch = useDispatch();
