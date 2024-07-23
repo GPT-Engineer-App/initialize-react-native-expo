@@ -1,41 +1,38 @@
-# initialize-react-native-expo
+# Acme Inc PWA
 
-Initialize the Project**:
-   - Create a new React Native project using Expo.
-   - Set up the project structure with necessary folders and files.
+This is a Progressive Web App (PWA) for Acme Inc, built with React, Vite, and integrated with EngineLabs.ai.
 
+## Getting Started
 
-## Collaborate with GPT Engineer
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Copy `.env.example` to `.env` and fill in your EngineLabs.ai API key
+4. Run the development server: `npm run dev`
 
-This is a [gptengineer.app](https://gptengineer.app)-synced repository 🌟🤖
+## Building for Production
 
-Changes made via gptengineer.app will be committed to this repo.
+To build the app for production, run:
 
-If you clone this repo and push changes, you will have them reflected in the GPT Engineer UI.
-
-## Tech stack
-
-This project is built with .
-
-- Vite
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## Setup
-
-```sh
-git clone https://github.com/GPT-Engineer-App/initialize-react-native-expo.git
-cd initialize-react-native-expo
-npm i
+```
+npm run build
 ```
 
-```sh
-npm run dev
-```
+## Features
 
-This will run a dev server with auto reloading and an instant preview.
+- Real-time object detection using TensorFlow.js
+- Integration with EngineLabs.ai for data storage and analytics
+- Custom endpoint creation and management
+- User management and authentication
+- Progressive Web App capabilities
 
-## Requirements
+## EngineLabs.ai Integration
 
-- Node.js & npm - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+This app uses EngineLabs.ai for data storage, analytics, and custom endpoint management. Make sure to set up your EngineLabs.ai account and obtain an API key before running the app.
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
